@@ -81,8 +81,8 @@ symmetric_beta_22 <- function(curr_state) {
   prop_state_raw <- rbeta(1, shape1=2, shape2=2)
   prop_state <- curr_state + (prop_state_raw*2 - 1)# Change to sample on [x-1, x+1]
   
-  t_ij <- dbeta(prop_state_raw, 2, 2)/2 # Question: is this correct?
-  t_ji <- dbeta((curr_state-prop_state)/2, 2, 2)/2
+  t_ij <- dbeta(prop_state_raw, 2, 2) # Question: is this correct?
+  t_ji <- dbeta((curr_state+1-prop_state)/2, 2, 2)
   
   result <- c(prop_state, t_ij, t_ji)
   
@@ -94,13 +94,23 @@ asymmetric_beta_31 <- function(curr_state) {
   prop_state_raw <- rbeta(1, shape1=3, shape2=1)
   prop_state <- curr_state + (prop_state_raw*2 - 1)
   
-  prop_state_list <- c(prop_state_list, prop_state)
-  
-  t_ij <- dbeta(prop_state_raw, 3, 1)/2 # Question: is this correct?
-  t_ji <- dbeta((curr_state-prop_state)/2, 3, 1)/2
+  t_ij <- dbeta(prop_state_raw, 3, 1) # Question: is this correct?
+  t_ji <- dbeta((curr_state+1-prop_state)/2, 3, 1)
   
   result <- c(prop_state, t_ij, t_ji)
+  
+  return(result)
+}
 
+asymmetric_beta_21 <- function(curr_state) {
+  prop_state_raw <- rbeta(1, shape1=2, shape2=1)
+  prop_state <- curr_state + (prop_state_raw*2 - 1)
+  
+  t_ij <- dbeta(prop_state_raw, 2, 1) # Question: is this correct?
+  t_ji <- dbeta((curr_state-prop_state+1)/2, 2, 1)
+  
+  result <- c(prop_state, t_ij, t_ji)
+  
   return(result)
 }
 
@@ -109,8 +119,6 @@ asymmetric_beta_31 <- function(curr_state) {
 ## FULL METROPOLIS-HASTINGS ALGORITHM
 
 full_mh <- function(steps, prop_function, mean, sd) {
-  
-  prop_state_list <- c() # debugging
   
   curr_state <- 0 # Set some arbitrary initial state # QUESTION: IS this truly arbitrary?
   curr_state_list <- c()
