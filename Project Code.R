@@ -2,6 +2,8 @@
 ### William Chen and Lucy Wu
 ### Spring 2018, Prof. Steele
 
+setwd("/Users/lucy/Documents/2018 Spring/STAT433/Final Project")
+
 #install.packages('normtest')
 library(normtest)
 
@@ -233,3 +235,29 @@ png('Symmetric_Beta_half.png')
 ggplot(data=prop_data, aes(x=prop_data$DATA_symmetric_beta_half)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
   stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(0.5, 0.5)")
 dev.off()
+
+# CALCULATE P-VALUES
+
+prop_data <- read.csv("/Users/lucy/Documents/2018 Spring/STAT433/totaldata v2.csv")
+
+cat <- colnames(prop_data)
+
+names <- c()
+stats <- c()
+pvals <- c()
+
+for(i in 2:length(cat)) {
+  res <- jb.norm.test(prop_data[, i])
+  
+  name <- cat[i]
+  stat <- res$statistic
+  pval <- res$p.value
+  
+  names <- c(names, name)
+  stats <- c(stats, stat)
+  pvals <- c(pvals, pval)
+}
+
+results_df <- data.frame(names, stats, pvals)
+
+write.csv(results_df, file="pval_results.csv")
