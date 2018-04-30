@@ -1,11 +1,12 @@
-# STAT 433 Final Project
-# William Chen and Lucy Wu
-# Spring 2018, Prof. Steele
+### STAT 433 Final Project
+### William Chen and Lucy Wu
+### Spring 2018, Prof. Steele
 
 #install.packages('normtest')
 library(normtest)
 
-## BASE METROPOLIS-HASTINGS ALGORITHM: ONE ITERATION
+# GETTING DATA
+
 onestep_mh <- function(curr_state, prop_state, t_ij, t_ji, mean, sd) {
   
   # Runs one step of the Metropolis-Hastings algorithm.
@@ -26,7 +27,7 @@ onestep_mh <- function(curr_state, prop_state, t_ij, t_ji, mean, sd) {
   #
   # -- Returns --
   # new_state : float
-  #   New state of the MC. 
+  #   New state of the MC.
   
   # Compute elements of the acceptance function
   pi_j <- dnorm(prop_state, mean=mean, sd=sd)
@@ -40,7 +41,7 @@ onestep_mh <- function(curr_state, prop_state, t_ij, t_ji, mean, sd) {
     new_state <- prop_state
   }
   
-  # Move to prop_state with probability a 
+  # Move to prop_state with probability a
   x <- runif(1, min=0, max=1)
   if (a >= x) {
     new_state <- prop_state
@@ -77,25 +78,50 @@ unif_rw_2 <- function(curr_state) {
 }
 
 # Uniform random walk proposal chain w/ symmetric Beta
-symmetric_beta_22 <- function(curr_state) {
-  prop_state_raw <- rbeta(1, shape1=2, shape2=2)
+symmetric_beta_half <- function(curr_state) {
+  prop_state_raw <- rbeta(1, shape1=0.5, shape2=0.5)
   prop_state <- curr_state + (prop_state_raw*2 - 1)# Change to sample on [x-1, x+1]
   
-  t_ij <- dbeta(prop_state_raw, 2, 2) # Question: is this correct?
-  t_ji <- dbeta((curr_state+1-prop_state)/2, 2, 2)
+  t_ij <- dbeta(prop_state_raw, 0.5, 0.5)/2
+  t_ji <- dbeta((curr_state+1-prop_state)/2, 0.5, 0.5)/2
   
   result <- c(prop_state, t_ij, t_ji)
   
   return(result)
 }
 
+symmetric_beta_22 <- function(curr_state) {
+  prop_state_raw <- rbeta(1, shape1=2, shape2=2)
+  prop_state <- curr_state + (prop_state_raw*2 - 1)# Change to sample on [x-1, x+1]
+  
+  t_ij <- dbeta(prop_state_raw, 2, 2)/2
+  t_ji <- dbeta((curr_state+1-prop_state)/2, 2, 2)/2
+  
+  result <- c(prop_state, t_ij, t_ji)
+  
+  return(result)
+}
+
+symmetric_beta_33 <- function(curr_state) {
+  prop_state_raw <- rbeta(1, shape1=3, shape2=3)
+  prop_state <- curr_state + (prop_state_raw*2 - 1)# Change to sample on [x-1, x+1]
+  
+  t_ij <- dbeta(prop_state_raw, 3, 3)/2
+  t_ji <- dbeta((curr_state+1-prop_state)/2, 3, 3)/2
+  
+  result <- c(prop_state, t_ij, t_ji)
+  
+  return(result)
+}
+
+
 # Uniform random walk proposal chain w/ asymmetric Beta
 asymmetric_beta_31 <- function(curr_state) {
   prop_state_raw <- rbeta(1, shape1=3, shape2=1)
   prop_state <- curr_state + (prop_state_raw*2 - 1)
   
-  t_ij <- dbeta(prop_state_raw, 3, 1) # Question: is this correct?
-  t_ji <- dbeta((curr_state+1-prop_state)/2, 3, 1)
+  t_ij <- dbeta(prop_state_raw, 3, 1)/2
+  t_ji <- dbeta((curr_state+1-prop_state)/2, 3, 1)/2
   
   result <- c(prop_state, t_ij, t_ji)
   
@@ -106,13 +132,26 @@ asymmetric_beta_21 <- function(curr_state) {
   prop_state_raw <- rbeta(1, shape1=2, shape2=1)
   prop_state <- curr_state + (prop_state_raw*2 - 1)
   
-  t_ij <- dbeta(prop_state_raw, 2, 1) # Question: is this correct?
-  t_ji <- dbeta((curr_state-prop_state+1)/2, 2, 1)
+  t_ij <- dbeta(prop_state_raw, 2, 1)/2
+  t_ji <- dbeta((curr_state-prop_state+1)/2, 2, 1)/2
   
   result <- c(prop_state, t_ij, t_ji)
   
   return(result)
 }
+
+asymmetric_beta_41 <- function(curr_state) {
+  prop_state_raw <- rbeta(1, shape1=4, shape2=1)
+  prop_state <- curr_state + (prop_state_raw*2 - 1)
+  
+  t_ij <- dbeta(prop_state_raw, 4, 1)/2 # Question: is this correct?
+  t_ji <- dbeta((curr_state+1-prop_state)/2, 4, 1)/2
+  
+  result <- c(prop_state, t_ij, t_ji)
+  
+  return(result)
+}
+
 
 # Proposal function
 
@@ -137,10 +176,60 @@ full_mh <- function(steps, prop_function, mean, sd) {
     curr_state_list <- c(curr_state_list, curr_state)
   }
   
-  hist(curr_state_list, prob=TRUE)
-  curve(dnorm(x, mean=mean, sd=sd), col="darkblue", lwd=2, add=TRUE, yaxt="n")
+  #hist(curr_state_list, prob=TRUE)
+  #curve(dnorm(x, mean=mean, sd=sd), col="darkblue", lwd=2, add=TRUE, yaxt="n")
   
-  print(jb.norm.test(curr_state_list))
+  #print(jb.norm.test(curr_state_list))
   
   return(curr_state_list)
 }
+
+DATA_asymmetric_beta_31 <- full_mh(100000, asymmetric_beta_31, 0, 1)
+DATA_asymmetric_beta_21 <- full_mh(100000, asymmetric_beta_21, 0, 1)
+DATA_asymmetric_beta_41 <- full_mh(100000, asymmetric_beta_41, 0, 1)
+
+DATA_symmetric_beta_half <- full_mh(100000, symmetric_beta_half, 0, 1)
+DATA_symmetric_beta_22 <- full_mh(100000, symmetric_beta_22, 0, 1)
+DATA_symmetric_beta_33 <- full_mh(100000, symmetric_beta_33, 0, 1)
+
+total_data <- data.frame(DATA_asymmetric_beta_21, DATA_asymmetric_beta_31, DATA_asymmetric_beta_41, DATA_symmetric_beta_22, DATA_symmetric_beta_33, DATA_symmetric_beta_half)
+
+write.csv(total_data, file='totaldata v2.csv')
+
+# PLOTTING RESULTS
+
+# Get data
+setwd("/Users/lucy/Documents/2018 Spring/STAT433")
+prop_data <- read.csv("/Users/lucy/Documents/2018 Spring/STAT433/totaldata v2.csv")
+
+# Specify functions to plot
+
+png('Asymmetric_Beta_21.png')
+ggplot(data=prop_data, aes(x=prop_data$DATA_asymmetric_beta_21)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X") + xlim(-6, 6) + ggtitle("Beta(2, 1)")
+dev.off()
+
+png('Asymmetric_Beta_31.png')
+ggplot(data=prop_data, aes(x=prop_data$DATA_asymmetric_beta_31)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlim(-6, 6)  + xlab("X")+ ggtitle("Beta(3, 1)")
+dev.off()
+
+png('Asymmetric_Beta_41.png')
+ggplot(data=prop_data, aes(x=prop_data$DATA_asymmetric_beta_41)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlim(-8, 8)  + xlab("X")+ ggtitle("Beta(4, 1)")
+dev.off()
+
+png('Symmetric_Beta_22.png')
+ggplot(data=prop_data, aes(x=prop_data$DATA_symmetric_beta_22)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(2, 2)")
+dev.off()
+
+png('Symmetric_Beta_33.png')
+ggplot(data=prop_data, aes(x=prop_data$DATA_symmetric_beta_33)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(3, 3)")
+dev.off()
+
+png('Symmetric_Beta_half.png')
+ggplot(data=prop_data, aes(x=prop_data$DATA_symmetric_beta_half)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(0.5, 0.5)")
+dev.off()
