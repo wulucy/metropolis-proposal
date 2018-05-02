@@ -159,7 +159,7 @@ asymmetric_beta_41 <- function(curr_state) {
 full_mh <- function(steps, prop_function, mean, sd) {
   
   curr_state <- 0 # Set some arbitrary initial state # QUESTION: IS this truly arbitrary?
-  curr_state_list <- c()
+  curr_state_list <- rep(NA, steps)
   
   for(i in 1:steps) {
     
@@ -176,7 +176,7 @@ full_mh <- function(steps, prop_function, mean, sd) {
     new_state <- onestep_mh(curr_state, prop_state, t_ij, t_ji, mean, sd)
     curr_state <- new_state
     
-    curr_state_list <- c(curr_state_list, curr_state)
+    curr_state_list[i] <- curr_state
   }
   
   #hist(curr_state_list, prob=TRUE)
