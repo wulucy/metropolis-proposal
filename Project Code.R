@@ -5,7 +5,9 @@
 setwd("/Users/lucy/Documents/2018 Spring/STAT433/Final Project")
 
 #install.packages('normtest')
+#install.packages('svMisc')
 library(normtest)
+library(progress)
 
 # GETTING DATA
 
@@ -37,11 +39,6 @@ onestep_mh <- function(curr_state, prop_state, t_ij, t_ji, mean, sd) {
   
   # Compute acceptance function value
   a <- (pi_j*t_ji)/(pi_i*t_ij)
-  
-  # Move to prop_state if a >= 1
-  if (a >= 1) {
-    new_state <- prop_state
-  }
   
   # Move to prop_state with probability a
   x <- runif(1, min=0, max=1)
@@ -165,6 +162,10 @@ full_mh <- function(steps, prop_function, mean, sd) {
   curr_state_list <- c()
   
   for(i in 1:steps) {
+    
+    # Prints progress (not central to algorithm)
+    progress(i, max.value=steps)
+    if(i==steps) cat('Done!')
     
     # Get proposal state
     prop_state <- prop_function(curr_state)[1]
