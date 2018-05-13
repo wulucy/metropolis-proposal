@@ -168,9 +168,10 @@ full_mh <- function(steps, prop_function, mean, sd) {
     if(i==steps) cat('Done!')
     
     # Get proposal state
-    prop_state <- prop_function(curr_state)[1]
-    t_ij <- prop_function(curr_state)[2]
-    t_ji <- prop_function(curr_state)[3]
+    prop_state_data <- prop_function(curr_state)
+    prop_state <- prop_state_data[1]
+    t_ij <- prop_state_data[2]
+    t_ji <- prop_state_data[3]
     
     # Run one iteration of MH
     new_state <- onestep_mh(curr_state, prop_state, t_ij, t_ji, mean, sd)
@@ -197,68 +198,71 @@ DATA_symmetric_beta_33 <- full_mh(100000, symmetric_beta_33, 0, 1)
 
 total_data <- data.frame(DATA_asymmetric_beta_21, DATA_asymmetric_beta_31, DATA_asymmetric_beta_41, DATA_symmetric_beta_22, DATA_symmetric_beta_33, DATA_symmetric_beta_half)
 
-write.csv(total_data, file='totaldata v2.csv')
+write.csv(total_data, file='totaldata v3.csv')
 
 # PLOTTING RESULTS
 
-# Get data
-setwd("/Users/lucy/Documents/2018 Spring/STAT433")
-prop_data <- read.csv("/Users/lucy/Documents/2018 Spring/STAT433/totaldata v2.csv")
+plot_results <- function(data) {
+  
+  png('Asymmetric_Beta_21 v3.png')
+  ggplot(data=data, aes(x=data$DATA_asymmetric_beta_21)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X") + xlim(-6, 6) + ggtitle("Beta(2, 1)")
+  dev.off()
+  
+  png('Asymmetric_Beta_31 v3.png')
+  ggplot(data=data, aes(x=data$DATA_asymmetric_beta_31)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlim(-6, 6)  + xlab("X")+ ggtitle("Beta(3, 1)")
+  dev.off()
+  
+  png('Asymmetric_Beta_41 v3.png')
+  ggplot(data=data, aes(x=data$DATA_asymmetric_beta_41)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlim(-8, 8)  + xlab("X")+ ggtitle("Beta(4, 1)")
+  dev.off()
+  
+  png('Symmetric_Beta_22 v3.png')
+  ggplot(data=data, aes(x=data$DATA_symmetric_beta_22)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(2, 2)")
+  dev.off()
+  
+  png('Symmetric_Beta_33 v3.png')
+  ggplot(data=data, aes(x=data$DATA_symmetric_beta_33)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(3, 3)")
+  dev.off()
+  
+  png('Symmetric_Beta_half v3.png')
+  ggplot(data=data, aes(x=data$DATA_symmetric_beta_half)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
+    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(0.5, 0.5)")
+  dev.off()
 
-# Specify functions to plot
-
-png('Asymmetric_Beta_21.png')
-ggplot(data=prop_data, aes(x=prop_data$DATA_asymmetric_beta_21)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X") + xlim(-6, 6) + ggtitle("Beta(2, 1)")
-dev.off()
-
-png('Asymmetric_Beta_31.png')
-ggplot(data=prop_data, aes(x=prop_data$DATA_asymmetric_beta_31)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlim(-6, 6)  + xlab("X")+ ggtitle("Beta(3, 1)")
-dev.off()
-
-png('Asymmetric_Beta_41.png')
-ggplot(data=prop_data, aes(x=prop_data$DATA_asymmetric_beta_41)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlim(-8, 8)  + xlab("X")+ ggtitle("Beta(4, 1)")
-dev.off()
-
-png('Symmetric_Beta_22.png')
-ggplot(data=prop_data, aes(x=prop_data$DATA_symmetric_beta_22)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(2, 2)")
-dev.off()
-
-png('Symmetric_Beta_33.png')
-ggplot(data=prop_data, aes(x=prop_data$DATA_symmetric_beta_33)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(3, 3)")
-dev.off()
-
-png('Symmetric_Beta_half.png')
-ggplot(data=prop_data, aes(x=prop_data$DATA_symmetric_beta_half)) + geom_histogram(aes(y=..density..), binwidth=0.1) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("Density") + xlab("X")+ ggtitle("Beta(0.5, 0.5)")
-dev.off()
+}
 
 # CALCULATE P-VALUES
 
-prop_data <- read.csv("/Users/lucy/Documents/2018 Spring/STAT433/totaldata v2.csv")
-
-cat <- colnames(prop_data)
-
-names <- c()
-stats <- c()
-pvals <- c()
-
-for(i in 2:length(cat)) {
-  res <- jb.norm.test(prop_data[, i])
+calc_pvals <- function(data, pvals_filename) {
   
-  name <- cat[i]
-  stat <- res$statistic
-  pval <- res$p.value
+  # INPUTS
+  # data = results of M-H algorithm
+  # pvals_filename = name of resulting .csv file
+
+  cat <- colnames(data)
   
-  names <- c(names, name)
-  stats <- c(stats, stat)
-  pvals <- c(pvals, pval)
+  names <- c()
+  stats <- c()
+  pvals <- c()
+  
+  for(i in 2:length(cat)) {
+    res <- jb.norm.test(data[, i])
+    
+    name <- cat[i]
+    stat <- res$statistic
+    pval <- res$p.value
+    
+    names <- c(names, name)
+    stats <- c(stats, stat)
+    pvals <- c(pvals, pval)
+  }
+  
+  results_df <- data.frame(names, stats, pvals)
+  
+  write.csv(results_df, file=pvals_filename)
 }
-
-results_df <- data.frame(names, stats, pvals)
-
-write.csv(results_df, file="pval_results.csv")
